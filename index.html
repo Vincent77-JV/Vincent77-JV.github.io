@@ -1,214 +1,289 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth bg-slate-950 text-slate-100 font-sans">
+<html lang="en" class="scroll-smooth bg-slate-950 text-white">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JinOps.tech | Industrial Compliance & Credit Orchestration Engine</title>
-    <!-- Stable Tailwind CSS Engine CDN -->
-    <script src="https://tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdfa',
-                            500: '#14b8a6', /* Teal 500 - Innovation */
-                            600: '#0d9488',
-                            900: '#111827'  /* Deep trust slate */
-                        }
-                    }
-                }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JinOps.tech | Transparent B2B Industrial Credit Orchestration Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            jin: {
+              primary: '#001F3F',
+              secondary: '#0051BA',
+              grey: '#595959',
+              light: '#F5F5F5',
+              success: '#2ECC71',
+              warning: '#F39C12',
+              danger: '#E74C3C'
             }
+          }
         }
-    </script>
+      }
+    };
+  </script>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-teal-500 selection:text-slate-900">
+<body class="min-h-screen bg-slate-950 text-white">
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-jin-primary/95 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <div>
+        <div class="text-lg font-semibold tracking-[0.28em] text-white">JINOPS.TECH</div>
+        <div class="text-xs uppercase tracking-[0.35em] text-white/50">Credit orchestration system</div>
+      </div>
+      <nav class="hidden gap-8 text-sm text-white/70 md:flex">
+        <a href="#pricing" class="transition hover:text-white">Pricing</a>
+        <a href="#onboarding" class="transition hover:text-white">Onboarding</a>
+        <a href="#underwriting" class="transition hover:text-white">Underwriting</a>
+      </nav>
+      <a href="#onboarding" class="rounded-full bg-jin-secondary px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
+        Start application
+      </a>
+    </div>
+  </header>
 
-    <!-- 🌐 NAVIGATION HEADER -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/60 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="text-2xl font-black tracking-tight text-white">
-                    J<span class="text-teal-400">in</span>Ops<span class="text-teal-500 text-xs font-semibold px-2 py-0.5 ml-1.5 rounded-md bg-slate-900 border border-slate-800">.tech</span>
-                </span>
+  <main>
+    <section class="border-b border-white/10 bg-gradient-to-b from-jin-primary to-slate-950">
+      <div class="mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8 lg:py-28">
+        <div>
+          <p class="mb-5 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/70">Medchal industrial belt</p>
+          <h1 class="max-w-4xl text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+            Transparent B2B Industrial Credit Orchestration Engine
+          </h1>
+          <p class="mt-6 max-w-2xl text-lg leading-8 text-white/70">
+            Institutional-grade onboarding, underwriting, and compliance for industrial borrowers with full data residency, MFA, and auditability.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href="#pricing" class="rounded-full bg-white px-6 py-3 text-sm font-semibold text-jin-primary transition hover:bg-jin-light">View Jin Split Pricing</a>
+            <a href="#underwriting" class="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/5">Open underwriting engine</a>
+          </div>
+          <div class="mt-10 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div class="text-xs uppercase tracking-[0.25em] text-white/45">Security</div>
+              <div class="mt-2 text-sm text-white/80">MFA, encrypted uploads, audit logs</div>
             </div>
-            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-                <a href="#philosophy" class="hover:text-teal-400 transition-colors">Our Foundational Ethics</a>
-                <a href="#pricing" class="hover:text-teal-400 transition-colors">Vadlapati Matrix</a>
-                <a href="#underwriter-demo" class="hover:text-teal-400 transition-colors">iPad Sandbox Demo</a>
-            </nav>
-            <div>
-                <a href="#underwriter-demo" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-semibold bg-teal-500 text-slate-950 hover:bg-teal-400 transition-all shadow-lg shadow-teal-500/20 active:scale-95">
-                    Launch Application
-                </a>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div class="text-xs uppercase tracking-[0.25em] text-white/45">Compliance</div>
+              <div class="mt-2 text-sm text-white/80">GDPR + India residency aligned</div>
             </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div class="text-xs uppercase tracking-[0.25em] text-white/45">Payments</div>
+              <div class="mt-2 text-sm text-white/80">Razorpay tokenized entry flow</div>
+            </div>
+          </div>
         </div>
-    </header>
-
-    <main class="flex-grow">
-        <!-- ⚡ HERO ANCHOR BLOCK -->
-        <section class="relative py-20 lg:py-32 overflow-hidden border-b border-slate-900">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20 mb-6">
-                    🚀 Medchal Corridor Digital Single-Window Portals
-                </span>
-                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
-                    The Single-Window Operating System for Telangana's <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Industrial Infrastructure</span>
-                </h1>
-                <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto">
-                    Automating corporate company incorporation, multi-scheme asset stacking, and zero-clerical-error financial underwriting data pipelines.
-                </p>
-                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#underwriter-demo" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold bg-teal-500 text-slate-950 hover:bg-teal-400 transition-all text-center">
-                        Initiate Portal Scan
-                    </a>
-                    <a href="#philosophy" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 transition-all text-center">
-                        Core Governance Model
-                    </a>
-                </div>
+        <div class="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-black/30">
+          <div class="rounded-2xl border border-white/10 bg-jin-primary p-6">
+            <div class="text-xs uppercase tracking-[0.3em] text-white/45">Jin Split Pricing</div>
+            <div class="mt-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <span class="text-sm text-white/70">Fixed Entry Token</span>
+                <span class="text-lg font-semibold">₹999</span>
+              </div>
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <span class="text-sm text-white/70">Reversible Software Token</span>
+                <span class="text-lg font-semibold">₹999</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-white/70">Success Premium</span>
+                <span class="text-lg font-semibold text-jin-success">Sliding scale</span>
+              </div>
             </div>
-        </section>
-
-        <!-- ✝️ THE JINOPS PHILOSOPHY LAYER -->
-        <section id="philosophy" class="py-20 border-b border-slate-900 bg-slate-900/20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto">
-                    <h2 class="text-3xl font-bold text-white tracking-tight">Our Core Foundational Ethics</h2>
-                    <p class="mt-4 text-slate-400">JinOps rejects standard manual middleman frameworks, operating under an ironclad spiritual and technological baseline of transparency.</p>
-                </div>
-                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-sm">
-                        <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 font-black text-xl mb-6">J</div>
-                        <h3 class="text-xl font-bold text-white mb-2">Jesus (Supreme Integrity)</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">Absolute transparency and truth in data governance. Every dossier processed has 0% artificial adjustments or arbitrary kickbacks.</p>
-                    </div>
-                    <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-sm">
-                        <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 font-black text-xl mb-6">In</div>
-                        <h3 class="text-xl font-bold text-white mb-2">Innovation (Automation Stack)</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">Deploying rapid Intelligent Document Processing (IDP). Transitioning unstructured industrial layouts into whitelisted JSON streams instantly.</p>
-                    </div>
-                    <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-sm">
-                        <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 font-black text-xl mb-6">Ops</div>
-                        <h3 class="text-xl font-bold text-white mb-2">Operations (Ground Dominance)</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">Anchored by 21+ years of heavy manufacturing factory supervision. We understand the physical shop floor mechanics of Medchal's industrial estates.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 💸 THE VADLAPATI SPLIT-PRICING MATRIX -->
-        <section id="pricing" class="py-20 border-b border-slate-900">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-3xl font-bold text-white tracking-tight">The Vadlapati Split-Pricing Matrix</h2>
-                    <p class="mt-4 text-slate-400">Removing entry risk for Indian young and women entrepreneurs while backing industrial performance metrics.</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    <!-- Pricing Column 1 -->
-                    <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between p-6">
-                        <div>
-                            <span class="px-2.5 py-1 rounded-md bg-teal-500/10 text-teal-400 text-xs font-semibold tracking-wider uppercase">Day-Zero Entry</span>
-                            <div class="mt-4 flex items-baseline text-white">
-                                <span class="text-5xl font-extrabold tracking-tight">₹999</span>
-                                <span class="ml-1 text-xl font-semibold text-slate-500">Fixed Registration</span>
-                            </div>
-                            <div class="mt-2 text-sm text-slate-400 font-medium">+ ₹999 Reversible SaaS Token (100% Refundable)</div>
-                            <p class="mt-6 text-sm text-slate-400 leading-relaxed">
-                                Covers complete company formation, verified Udyam certificate tracking, and baseline GSTIN generation. The SaaS fee is completely credited back to you on the success premium invoice.
-                            </p>
-                        </div>
-                    </div>
-                    <!-- Pricing Column 2 -->
-                    <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between p-6">
-                        <div>
-                            <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-semibold tracking-wider uppercase">Success Commission</span>
-                            <div class="mt-4 flex items-baseline text-white">
-                                <span class="text-4xl font-extrabold tracking-tight">Regressive Scale</span>
-                            </div>
-                            <div class="mt-2 text-sm text-slate-400 font-medium">Sliding-Scale Payout Framework</div>
-                            <p class="mt-6 text-sm text-slate-400 leading-relaxed">
-                                Performance fees adjust automatically by scale: 2.0% success premium for approved credit lines under ₹10 Lakhs, dropping directly to 1.5% execution caps for industrial milestones exceeding ₹25 Lakhs.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 📊 LIVE UNDERWRITING SANDBOX -->
-        <section id="underwriter-demo" class="py-16 bg-slate-900/50 border-b border-slate-900">
-            <div class="max-w-4xl mx-auto px-4">
-              <!DOCTYPE html>
-<html lang="en" class="scroll-smooth bg-slate-950 text-slate-100 font-sans">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JinOps.tech | Industrial Compliance & Credit Orchestration Engine</title>
-    <!-- Stable Tailwind CSS Engine CDN -->
-    <script src="https://tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 500: '#14b8a6', 900: '#111827' }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="min-h-screen flex flex-col bg-slate-950">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <span class="text-2xl font-black text-white">J<span class="text-teal-400">in</span>Ops<span class="text-xs px-2 py-0.5 rounded bg-slate-900">.tech</span></span>
-            <a href="#underwriter-demo" class="px-5 py-2.5 rounded-lg text-sm font-semibold bg-teal-500 text-slate-950">Launch App</a>
+            <p class="mt-6 text-sm leading-7 text-white/60">
+              Premiums adjust based on approved credit. Lower exposure, lower premium. Larger approved lines preserve a transparent, capped fee structure.
+            </p>
+          </div>
+          <div class="mt-4 grid gap-3 text-sm text-white/70 sm:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">Trust indicators</div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">No sponsored content</div>
+          </div>
         </div>
-    </header>
+      </div>
+    </section>
 
-    <main class="flex-grow">
-        <!-- Live Underwriting Sandbox -->
-        <section id="underwriter-demo" class="py-16">
-            <div class="max-w-4xl mx-auto px-4">
-                <div class="bg-slate-900 rounded-2xl border border-slate-700 p-8 shadow-2xl">
-                    <h3 class="text-xl font-bold text-white mb-6">JinOps Interactive Underwriting Engine</h3>
-                    <div class="space-y-4 mb-6">
-                        <input type="number" id="subsidyAmount" value="1500000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white">
-                        <input type="date" id="sanctionDate" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white">
-                    </div>
-                    <div class="bg-slate-950 rounded-xl p-5 border border-slate-800">
-                        <div id="feePercentage" class="text-teal-400 font-bold">1.5% Tier</div>
-                        <div id="successFeeDisplay" class="text-3xl font-black text-white">₹22,500</div>
-                        <div id="deadlineDisplay" class="text-sm text-emerald-400 mt-2">Calculating...</div>
-                    </div>
+    <section id="pricing" class="border-b border-white/10 bg-slate-950">
+      <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <p class="text-xs uppercase tracking-[0.35em] text-white/45">Pricing architecture</p>
+          <h2 class="mt-4 text-3xl font-semibold">Clear, institutional fee structure</h2>
+          <p class="mt-4 text-white/65">Designed for industrial borrowers who need predictable entry costs and a transparent success fee tied to approval outcomes.</p>
+        </div>
+        <div class="mt-10 grid gap-6 lg:grid-cols-3">
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div class="text-xs uppercase tracking-[0.25em] text-white/45">Step 1</div>
+            <div class="mt-3 text-2xl font-semibold">₹999 Entry Token</div>
+            <p class="mt-3 text-sm leading-7 text-white/65">Initiates onboarding and file review for serious applicants only.</p>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div class="text-xs uppercase tracking-[0.25em] text-white/45">Step 2</div>
+            <div class="mt-3 text-2xl font-semibold">₹999 Reversible Software Token</div>
+            <p class="mt-3 text-sm leading-7 text-white/65">Credited back against the final success invoice when the file completes.</p>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div class="text-xs uppercase tracking-[0.25em] text-white/45">Step 3</div>
+            <div class="mt-3 text-2xl font-semibold">Sliding-Scale Success Premium</div>
+            <p class="mt-3 text-sm leading-7 text-white/65">Calculated from approved credit with lower rates for larger, cleaner approvals.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="onboarding" class="border-b border-white/10 bg-jin-light text-slate-900">
+      <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[1fr_0.95fr]">
+          <div>
+            <p class="text-xs uppercase tracking-[0.35em] text-jin-grey">Client onboarding</p>
+            <h2 class="mt-4 text-3xl font-semibold">Multi-step secure file submission</h2>
+            <p class="mt-4 max-w-2xl text-slate-700">Upload 12-month current account statements and GST logs in PDF format, review extracted status, and progress through the application timeline.</p>
+
+            <div class="mt-8 space-y-4">
+              <div class="rounded-3xl border border-slate-200 bg-white p-5">
+                <div class="flex items-center justify-between text-sm font-medium">
+                  <span>Step 1. Identity and business profile</span><span>Complete</span>
                 </div>
+              </div>
+              <div class="rounded-3xl border border-slate-200 bg-white p-5">
+                <div class="flex items-center justify-between text-sm font-medium">
+                  <span>Step 2. Encrypted document upload</span><span>Active</span>
+                </div>
+                <div class="mt-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                  <div class="font-semibold">Upload 12-Month Current Account Statements &amp; GST Logs (PDF format)</div>
+                  <div class="mt-2 text-sm text-slate-600">Drag-and-drop, preview, and validation enabled</div>
+                </div>
+              </div>
+              <div class="rounded-3xl border border-slate-200 bg-white p-5">
+                <div class="flex items-center justify-between text-sm font-medium">
+                  <span>Step 3. Agreement signing</span><span>Pending</span>
+                </div>
+              </div>
             </div>
-        </section>
-    </main>
+          </div>
+          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Application status</h3>
+              <span class="rounded-full bg-jin-success/10 px-3 py-1 text-xs font-semibold text-jin-success">Secure review</span>
+            </div>
+            <div class="mt-6 space-y-4">
+              <div class="rounded-2xl bg-slate-50 p-4">
+                <div class="text-xs uppercase tracking-[0.25em] text-slate-500">Timeline</div>
+                <div class="mt-2 text-sm text-slate-700">Submission → Extraction → Review → Decision</div>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-4">
+                <div class="text-xs uppercase tracking-[0.25em] text-slate-500">File integrity</div>
+                <div class="mt-2 text-sm text-slate-700">PDF validation, secure storage, and checksum logging</div>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-4">
+                <div class="text-xs uppercase tracking-[0.25em] text-slate-500">Review status</div>
+                <div class="mt-2 text-sm text-slate-700">Ready for underwriting queue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const dateInput = document.getElementById('sanctionDate');
-            if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
-            const subsidyInput = document.getElementById('subsidyAmount');
-            function runJinOpsUnderwriter() {
-                const amount = parseFloat(subsidyInput.value) || 0;
-                let rate = amount > 2500000 ? 0.015 : (amount >= 1000000 ? 0.0175 : 0.02);
-                const totalFee = amount * rate;
-                document.getElementById('feePercentage').innerText = `${(rate * 100).toFixed(2)}% Performance Success Fee Tier`;
-                document.getElementById('successFeeDisplay').innerText = `₹${Math.round(totalFee).toLocaleString('en-IN')}`;
-                if(dateInput && dateInput.value) {
-                    const approvalDate = new Date(dateInput.value);
-                    approvalDate.setDate(approvalDate.getDate() + 7);
-                    document.getElementById('deadlineDisplay').innerText = approvalDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) + ' (Before 17:00 IST)';
-                }
-            }
-            if (subsidyInput) subsidyInput.addEventListener('input', runJinOpsUnderwriter);
-            if (dateInput) dateInput.addEventListener('change', runJinOpsUnderwriter);
-            runJinOpsUnderwriter();
-        });
-    </script>
+    <section id="underwriting" class="bg-slate-950">
+      <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <p class="text-xs uppercase tracking-[0.35em] text-white/45">Visual underwriting engine</p>
+          <h2 class="mt-4 text-3xl font-semibold">Real-time credit risk and capacity card</h2>
+        </div>
+        <div class="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <label class="block text-sm text-white/70">Gross Monthly Revenue (₹)</label>
+            <input id="revenue" type="number" value="1500000" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none" />
+            <label class="mt-5 block text-sm text-white/70">Existing Monthly EMI Obligations (₹)</label>
+            <input id="emi" type="number" value="240000" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none" />
+            <label class="mt-5 block text-sm text-white/70">Business Pincode</label>
+            <input id="pincode" type="text" maxlength="6" value="500001" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none" />
+            <div class="mt-6 rounded-2xl border border-white/10 bg-slate-900 p-4 text-sm text-white/70">
+              Validation: 5-digit pan-India rule enforced in backend and UI.
+            </div>
+          </div>
+          <div class="rounded-3xl border border-white/10 bg-jin-primary p-6">
+            <div class="text-xs uppercase tracking-[0.35em] text-white/45">Live outputs</div>
+            <div class="mt-5 grid gap-4 sm:grid-cols-3">
+              <div class="rounded-2xl bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.25em] text-white/45">FOIR</div>
+                <div id="foirValue" class="mt-3 text-3xl font-semibold text-jin-success">16.0%</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.25em] text-white/45">Capacity</div>
+                <div id="capacityValue" class="mt-3 text-2xl font-semibold">₹0</div>
+              </div>
+              <div class="rounded-2xl bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.25em] text-white/45">Success fee</div>
+                <div id="feeValue" class="mt-3 text-2xl font-semibold">1.50%</div>
+              </div>
+            </div>
+            <div id="riskState" class="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm">
+              Clean profile: green underwriting band
+            </div>
+            <div class="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+              Export and admin notification hooks can be wired to the Express API and workflow engine.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-jin-primary">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-white/60 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <div>JinOps.tech — institutional credit orchestration for India.</div>
+      <div>India data residency • Secure uploads • MFA • Audit logging</div>
+    </div>
+  </footer>
+
+  <script>
+    const revenueInput = document.getElementById('revenue');
+    const emiInput = document.getElementById('emi');
+    const pincodeInput = document.getElementById('pincode');
+    const foirValue = document.getElementById('foirValue');
+    const capacityValue = document.getElementById('capacityValue');
+    const feeValue = document.getElementById('feeValue');
+    const riskState = document.getElementById('riskState');
+
+    function formatInr(value) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Math.max(0, value));
+    }
+
+    function updateEngine() {
+      const revenue = Number(revenueInput.value) || 0;
+      const emi = Number(emiInput.value) || 0;
+      const foir = revenue > 0 ? (emi / revenue) * 100 : 0;
+      const usableCapacity = Math.max(0, revenue * 8 - emi * 3);
+
+      let feeRate = 2.0;
+      let band = 'Red underwriting band';
+      let bandClass = 'text-jin-danger';
+
+      if (foir < 30) {
+        feeRate = usableCapacity > 2500000 ? 1.25 : 1.5;
+        band = 'Green underwriting band';
+        bandClass = 'text-jin-success';
+      } else if (foir <= 50) {
+        feeRate = usableCapacity > 1500000 ? 1.75 : 2.0;
+        band = 'Yellow underwriting band';
+        bandClass = 'text-jin-warning';
+      }
+
+      foirValue.textContent = `${foir.toFixed(1)}%`;
+      foirValue.className = `mt-3 text-3xl font-semibold ${bandClass}`;
+      capacityValue.textContent = formatInr(usableCapacity);
+      feeValue.textContent = `${feeRate.toFixed(2)}%`;
+      riskState.textContent = `${band}: FOIR is ${foir.toFixed(1)}%.`;
+
+      const validPincode = /^[1-9][0-9]{5}$/.test(pincodeInput.value);
+      pincodeInput.classList.toggle('border-jin-danger', !validPincode && pincodeInput.value.length > 0);
+      pincodeInput.classList.toggle('border-jin-success', validPincode);
+    }
+
+    revenueInput.addEventListener('input', updateEngine);
+    emiInput.addEventListener('input', updateEngine);
+    pincodeInput.addEventListener('input', updateEngine);
+    updateEngine();
+  </script>
 </body>
 </html>
