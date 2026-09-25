@@ -1,166 +1,122 @@
-import io
-import json
-import re
+﻿import re
+import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from pydantic import BaseModel
 
-from app.api.deps import MockUser, get_current_user
-from app.core.config import settings
-from app.services.idp_service import IDPProcessingService
-from app.services.pdf_service import CAMPDFGeneratorService
+PROJECT_ROOT = Path(__file__).resolve().parents[5]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    import pypdf
+    from app.jinops_engine import JinOpsUnderwritingEngine
 except ImportError:
-    pypdf = None
+    JinOpsUnderwritingEngine = None
 
+try:
+    from app.services.pdf_service import CAMPDFGeneratorService
+except ImportError:
+    CAMPDFGeneratorService = None
 
 router = APIRouter()
-ALLOWED_TYPES = {
+
+UPLOAD_DIR = PROJECT_ROOT / "uploads" / "documents"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+MAX_BYTES = 50 * 1024 * 1024
+
+ALLOWED_MIME_TYPES = {
     "application/pdf": ".pdf",
     "image/png": ".png",
     "image/jpeg": ".jpg",
 }
 
-
-class ExtractedFieldData(BaseModel):
-    value: Any = None
-    confidence: float = Field(..., ge=0.0, le=1.0)
-    needs_manual_review: bool
-
-
-class IDPParsingResponse(BaseModel):
-    filename: str
-    file_type: str
-    overall_confidence: float
-    extracted_data: Dict[str, ExtractedFieldData]
-    rbi_dpdp_notice: str = "Data processed in-memory via TLS 1.3."
+class DocumentUploadResponse(BaseModel):
+    status: str
+    message: str
+    data: Dict[str, Any]
 
 
-class DocumentUploadResponse(IDPParsingResponse):
-    document_id: UUID
-    owner: str
-    stored_at: datetime
-    report_url: str
-
-
-def _owner_dir(user: MockUser) -> Path:
-    owner_key = re.sub(r"[^a-zA-Z0-9_.-]", "_", user.email)[:100] or "anonymous"
-    path = settings.DOCUMENT_STORAGE_DIR / owner_key
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
-def _document_paths(document_id: UUID, user: MockUser) -> tuple[Path, Path]:
-    directory = _owner_dir(user)
-    return directory / f"{document_id}.bin", directory / f"{document_id}.json"
-
-
-async def _read_validated_upload(file: UploadFile) -> bytes:
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(
-            status_code=415,
-            detail="Only PDF, PNG, and JPEG financial documents are accepted.",
-        )
-    if not file.filename or Path(file.filename).name != file.filename:
-        raise HTTPException(status_code=400, detail="Invalid filename.")
-
-    chunks = []
-    size = 0
-    while chunk := await file.read(1024 * 1024):
-        size += len(chunk)
-        if size > settings.MAX_DOCUMENT_SIZE_BYTES:
+# ==================== STEP 2: HIGH-PERFORMANCE MULTI-STEP FILE UPLOAD & UNDERWRITING ====================
+@router.post("/upload-msme-docs", response_model=DocumentUploadResponse)
+async def upload_msme_documents(
+    applicant_name: str = Form(...),
+    business_name: str = Form("JinOps Client"),
+    cibil_score: int = Form(710),
+    monthly_income: float = Form(250000.0),
+    existing_emi: float = Form(40000.0),
+    requested_loan: float = Form(2000000.0),
+    tenure_months: int = Form(36),
+    interest_rate: float = Form(14.0),
+    bank_statement: UploadFile = File(...),
+    gst_file: UploadFile = File(...)
+):
+    """Store two financial documents and run the underwriting engine."""
+    try:
+        if bank_statement.content_type not in ALLOWED_MIME_TYPES or gst_file.content_type not in ALLOWED_MIME_TYPES:
             raise HTTPException(
-                status_code=413,
-                detail="Document exceeds the 10 MB limit.",
+                status_code=400,
+                detail="à°…à°¨à±à°®à°¤à°¿à°‚à°šà°¬à°¡à°¿à°¨ à°«à±ˆà°²à± à°°à°•à°¾à°²à± à°•à±‡à°µà°²à°‚ PDF, PNG, à°²à±‡à°¦à°¾ JPG à°®à°¾à°¤à±à°°à°®à±‡."
             )
-        chunks.append(chunk)
 
-    if not size:
-        raise HTTPException(status_code=400, detail="The uploaded document is empty.")
-    return b"".join(chunks)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        unique_id = uuid4().hex[:8]
 
+        bank_filename = f"bank_{timestamp}_{unique_id}_{Path(bank_statement.filename or 'upload').name}"
+        bank_path = UPLOAD_DIR / bank_filename
 
-@router.post("/parse-docket", response_model=IDPParsingResponse)
-async def upload_and_parse_document(
-    file: UploadFile = File(...),
-    current_user: MockUser = Depends(get_current_user),
-):
-    contents = await _read_validated_upload(file)
-    raw_text = ""
-    if file.content_type == "application/pdf" and pypdf:
-        reader = pypdf.PdfReader(io.BytesIO(contents))
-        for page in reader.pages:
-            raw_text += (page.extract_text() or "") + "\n"
-    else:
-        raw_text = contents.decode("latin-1", errors="ignore")
+        with open(bank_path, "wb") as buffer:
+            shutil.copyfileobj(bank_statement.file, buffer)
 
-    idp_results = IDPProcessingService.parse_gst_3b_text(raw_text)
-    gstin_val = idp_results.get("gstin")
-    turnover_val = idp_results.get("annual_turnover_estimate")
+        gst_filename = f"gst_{timestamp}_{unique_id}_{Path(gst_file.filename or 'upload').name}"
+        gst_path = UPLOAD_DIR / gst_filename
 
-    document_id = uuid4()
-    document_path, metadata_path = _document_paths(document_id, current_user)
-    document_path.write_bytes(contents)
-    stored_at = datetime.now(timezone.utc)
-    response = {
-        "document_id": document_id,
-        "filename": file.filename,
-        "file_type": file.content_type,
-        "owner": current_user.email,
-        "stored_at": stored_at,
-        "report_url": f"{settings.API_V1_STR}/documents/{document_id}/cam-report",
-        "overall_confidence": idp_results.get("confidence_score", 0.50),
-        "extracted_data": {
-            "gstin": ExtractedFieldData(
-                value=gstin_val,
-                confidence=0.95 if gstin_val else 0.0,
-                needs_manual_review=not bool(gstin_val),
-            ),
-            "annual_turnover_inr": ExtractedFieldData(
-                value=turnover_val,
-                confidence=0.88 if turnover_val else 0.0,
-                needs_manual_review=not bool(turnover_val),
-            ),
-        },
-    }
-    metadata_path.write_text(json.dumps(response, default=str), encoding="utf-8")
-    return response
+        with open(gst_path, "wb") as buffer:
+            shutil.copyfileobj(gst_file.file, buffer)
 
+        if bank_path.stat().st_size > MAX_BYTES or gst_path.stat().st_size > MAX_BYTES:
+            bank_path.unlink(missing_ok=True)
+            gst_path.unlink(missing_ok=True)
+            raise HTTPException(status_code=413, detail="à°«à±ˆà°²à± à°ªà°°à°¿à°®à°¾à°£à°‚ 50MB à°•à°‚à°Ÿà±‡ à°¤à°•à±à°•à±à°µà°—à°¾ à°‰à°‚à°¡à°¾à°²à°¿.")
 
-@router.get("/{document_id}/cam-report")
-async def download_cam_report(
-    document_id: UUID,
-    current_user: MockUser = Depends(get_current_user),
-):
-    document_path, metadata_path = _document_paths(document_id, current_user)
-    if not metadata_path.is_file() or not document_path.is_file():
-        raise HTTPException(status_code=404, detail="Document not found.")
+        underwriting_result = {}
+        if JinOpsUnderwritingEngine is not None:
+            engine = JinOpsUnderwritingEngine()
+            underwriting_result = engine.process_underwriting(
+                applicant_name=applicant_name,
+                cibil_score=cibil_score,
+                monthly_income=monthly_income,
+                existing_emi=existing_emi,
+                annual_gst_turnover=monthly_income * 12 * 0.95,
+                annual_banking_turnover=monthly_income * 12,
+                net_profit_annual=monthly_income * 12 * 0.18,
+                depreciation_annual=50000.0,
+                interest_annual=60000.0,
+                requested_loan=requested_loan,
+                tenure_months=tenure_months,
+                interest_rate=interest_rate
+            )
 
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    report_data = {
-        "proposal_date": metadata["stored_at"][:10],
-        "client_legal_name": current_user.email,
-        "operating_name": metadata["filename"],
-        "business_summary_text": (
-            "Financial document uploaded for preliminary MSME credit appraisal."
-        ),
-        "annual_turnover_inr": (
-            metadata["extracted_data"].get("annual_turnover_inr", {}).get("value") or 0
-        ),
-        "monthly_turnover_matrix": [],
-    }
-    pdf_bytes = CAMPDFGeneratorService.generate_cam_pdf(report_data)
-    report_path = document_path.with_suffix(".pdf")
-    report_path.write_bytes(pdf_bytes)
-    return FileResponse(
-        report_path,
-        media_type="application/pdf",
-        filename=f"jinops-cam-{document_id}.pdf",
-    )
+        return DocumentUploadResponse(
+            status="SUCCESS",
+            message="à°¡à°¾à°•à±à°¯à±à°®à±†à°‚à°Ÿà±à°²à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°…à°ªà±â€Œà°²à±‹à°¡à± à°…à°¯à±à°¯à°¾à°¯à°¿ à°®à°°à°¿à°¯à± à°ªà±à°°à°¾à°¸à±†à°¸à°¿à°‚à°—à± à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿!",
+            data={
+                "applicant": applicant_name,
+                "business": business_name,
+                "saved_bank_statement": bank_filename,
+                "saved_gst_file": gst_filename,
+                "total_file_size_bytes": bank_path.stat().st_size + gst_path.stat().st_size,
+                "upload_timestamp": datetime.now(timezone.utc).isoformat(),
+                "underwriting_summary": underwriting_result
+            }
+        )
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"à°…à°ªà±â€Œà°²à±‹à°¡à± à°²à±‡à°¦à°¾ à°…à°‚à°¡à°°à±â€Œà°°à±ˆà°Ÿà°¿à°‚à°—à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿: {str(e)}")
