@@ -5,7 +5,7 @@
   <link rel="apple-touch-icon" href="/favicon.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JinOps.tech | Transparent B2B Industrial Credit Orchestration Engine</title>
+  <title>JinOps Financial Intelligence | Transparent B2B Industrial Credit Orchestration Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -31,7 +31,7 @@
   <header class="sticky top-0 z-50 border-b border-white/10 bg-jin-primary/95 backdrop-blur">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
       <div>
-        <div class="text-lg font-semibold tracking-[0.28em] text-white">JINOPS.TECH</div>
+        <div class="text-lg font-semibold tracking-[0.28em] text-white">JinOps Financial Intelligence</div>
         <div class="text-xs uppercase tracking-[0.35em] text-white/50">Credit orchestration system</div>
       </div>
       <nav class="hidden gap-8 text-sm text-white/70 md:flex">
@@ -286,6 +286,47 @@
     emiInput.addEventListener('input', updateEngine);
     pincodeInput.addEventListener('input', updateEngine);
     updateEngine();
-  </script>
+    pincodeInput.addEventListener('input', updateEngine);
+    updateEngine(); // Line 288
+
+    // === ఇక్కడ (Line 289 నుండి) ఈ క్రొత్త ఫంక్షన్‌ను పేస్ట్ చేయండి ===
+    async function uploadStep2Files() {
+        const bankFileInput = document.getElementById('bank_pdf');
+        const gstFileInput = document.getElementById('gst_pdf');
+
+        if (!bankFileInput || !gstFileInput || !bankFileInput.files[0] || !gstFileInput.files[0]) {
+            alert('దయచేసి బ్యాంక్ స్టేట్‌మెంట్ మరియు GST రిపోర్ట్ రెండూ సెలెక్ట్ చేయండి.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('applicant_name', 'Vincent Paul');
+        formData.append('business_name', 'JinOps Enterprise');
+        formData.append('bank_statement', bankFileInput.files[0]);
+        formData.append('gst_file', gstFileInput.files[0]);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/v1/upload-msme-docs', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('JinOps Response:', result);
+                alert('డాక్యుమెంట్లు విజయవంతంగా అప్‌లోడ్ అయ్యాయి!');
+            } else {
+                alert('అప్‌లోడ్ ఎర్రర్: ' + (result.detail || 'మాన్యువల్ చెకింగ్ అవసరం'));
+            }
+        } catch (error) {
+            console.error('Network Error:', error);
+            alert('సర్వర్ కనెక్ట్ అవ్వలేదు. దయచేసి uvicorn సర్వర్ రన్‌లో ఉందో లేదో చూడండి.');
+        }
+    }
+
+</script> <!-- ఇక్కడితో script ట్యాగ్ క్లోజ్ అవుతుంది -->
 </body>
 </html>
+
+ 

@@ -1,4 +1,7 @@
+import re
 import io
+import gc
+from pypdf import PdfReader
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 from reportlab.lib import colors
@@ -316,3 +319,85 @@ class CAMPDFGeneratorService:
         doc.build(elements, canvasmaker=NumberedCanvas)
         buffer.seek(0)
         return buffer.getvalue()
+
+def parse_pdf_bulletproof(pdf_bytes: bytes, password: str = None) -> dict:
+    """
+    JinOps Bulletproof IDP Parser (Password Protection + Zero Retention)
+    """
+    if len(pdf_bytes) > 5 * 1024 * 1024:
+        return {"success": False, "error": "FILE_TOO_LARGE", "message": "File size exceeds 5MB limit"}
+
+    pdf_file = io.BytesIO(pdf_bytes)
+    
+    try:
+        reader = PdfReader(pdf_file)
+        
+        if reader.is_encrypted:
+            if not password:
+                return {
+                    "success": False, 
+                    "error": "PASSWORD_REQUIRED", 
+                    "message": "PDF is password protected. Prompt user for password."
+                }
+            decrypted = reader.decrypt(password)
+            if decrypted == 0:
+                return {
+                    "success": False, 
+                    "error": "INVALID_PASSWORD", 
+                    "message": "Incorrect PDF password."
+                }
+
+        metadata = reader.metadata or {}
+        creator = str(metadata.get('/Creator', '')).lower()
+        producer = str(metadata.get('/Producer', '')).lower()
+        
+        tamper_flag = False
+        if "canva" in creator or "pdfscape" in creator or "edit" in producer:
+            tamper_flag = True
+
+        extracted_text = ""
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                extracted_text += text + "\n"
+
+        if not extracted_text.strip():
+            return {
+                "success": False, 
+                "is_scanned": True, 
+                "message": "Scanned document detected. Manual input required."
+            }
+
+        gstin_pattern = r"\b\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z1-9]{1}Z[a-zA-Z0-9]{1}\b"
+        pan_pattern = r"\b[A-Z]{5}\d{4}[A-Z]{1}\b"
+        name_pattern = r"(?:Legal Name of Business|Name of Enterprise|Trade Name|Business Name)\s*[:\-]?\s*([A-Za-z0-9\s\.\&\,\-]+)"
+        turnover_pattern = r"(?:Total Turnover|Taxable Value|Aggregate Turnover|Turnover)\s*[:\-]?\s*₹?\s*([\d,]+(?:\.\d{2})?)"
+
+        gstin_match = re.search(gstin_pattern, extracted_text)
+        pan_match = re.search(pan_pattern, extracted_text)
+        name_match = re.search(name_pattern, extracted_text, re.IGNORECASE)
+        turnover_match = re.search(turnover_pattern, extracted_text, re.IGNORECASE)
+
+        gstin = gstin_match.group(0) if gstin_match else None
+        pan = pan_match.group(0) if pan_match else (gstin[2:12] if gstin else None)
+        entity_name = name_match.group(1).strip().split('\n')[0] if name_match else None
+        turnover = float(turnover_match.group(1).replace(",", "")) if turnover_match else None
+
+        return {
+            "success": True,
+            "tamper_warning": tamper_flag,
+            "data": {
+                "gstin": gstin,
+                "pan": pan,
+                "entity_name": entity_name,
+                "annual_turnover": turnover
+            }
+        }
+
+    except Exception as e:
+        return {"success": False, "error": "PARSING_FAILED", "message": str(e)}
+
+    finally:
+        pdf_file.close()
+        del pdf_bytes
+        gc.collect()
