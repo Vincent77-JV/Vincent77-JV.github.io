@@ -324,7 +324,67 @@
             alert('సర్వర్ కనెక్ట్ అవ్వలేదు. దయచేసి uvicorn సర్వర్ రన్‌లో ఉందో లేదో చూడండి.');
         }
     }
+async function uploadAndGenerateCAM(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("దయచేసి ఒక డాక్యుమెంట్ (PDF/Image) సెలెక్ట్ చేయండి.");
+        return;
+    }
 
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/v1/documents/upload-and-parse", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("ఫైల్ ప్రాసెసింగ్‌లో సమస్య వచ్చింది.");
+        }
+
+        const result = await response.json();
+        console.log("CAM Report Data:", result);
+        alert("CAM రిపోర్ట్ సక్సెస్‌ఫుల్‌గా జెనరేట్ అయింది!");
+        await downloadCAMReportPDF(result);
+        return result;
+    } catch (error) {
+        console.error("Error uploading document:", error);
+        alert("ఎర్రర్: " + error.message);
+    }
+}
+async function downloadCAMReportPDF(camData) {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/v1/documents/generate-cam-pdf-file", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(camData)
+        });
+
+        if (!response.ok) {
+            throw new Error("PDF జెనరేట్ చేయడంలో విఫలమైంది.");
+        }
+
+        // PDF ఫైల్‌ను బ్రౌజర్‌లో ఆటోమేటిక్‌‌గా డౌన్‌లోడ్ చేయడం
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = "JinOps_CAM_Report.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        
+        alert("JinOps CAM రిపోర్ట్ (PDF) సక్సెస్‌ఫుల్‌గా డౌన్‌లోడ్ అయింది!");
+    } catch (error) {
+        console.error("PDF Download Error:", error);
+        alert("PDF డౌన్‌లోడ్‌‌లో లోపం: " + error.message);
+    }
+}
 </script> <!-- ఇక్కడితో script ట్యాగ్ క్లోజ్ అవుతుంది -->
 </body>
 </html>

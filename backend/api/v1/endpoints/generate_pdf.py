@@ -260,4 +260,91 @@ if __name__ == "__main__":
             {"month": "August", "amount": 145500, "source": "Mid-Term Fee Allocation Block"}
         ]
     }
+class CAMPDFGeneratorService:
+    @staticmethod
+    def generate_cam_pdf(data: dict) -> bytes:
+        import io
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib import colors
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+
+        title_style = ParagraphStyle(
+            'TitleStyle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            textColor=colors.HexColor('#0A192F')
+        )
+        elements.append(Paragraph("JinOps Capital - Credit Assessment Memo (CAM)", title_style))
+        elements.append(Spacer(1, 15))
+
+        table_data = [
+            ["Parameter", "Extracted Value / Assessment"],
+            ["Entity Name", str(data.get("entity_name", "N/A"))],
+            ["GSTIN", str(data.get("gstin", "N/A"))],
+            ["PAN", str(data.get("pan", "N/A"))],
+            ["Annual Turnover", f"₹ {data.get('annual_turnover', 0):,.2f}"],
+            ["Eligibility Status", str(data.get("eligibility_status", "N/A"))],
+            ["Recommended Loan Limit", f"₹ {data.get('max_recommended_loan', 0):,.2f}"],
+            ["JinOps Risk Score", f"{data.get('risk_score', 'N/A')} / 900"]
+        ]
+
+        t = Table(table_data, colWidths=[200, 300])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0A192F')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+            ('PADDING', (0, 0), (-1, -1), 8),
+        ]))
+
+        elements.append(t)
+        doc.build(elements)
+        buffer.seek(0)
+        return buffer.getvalue()
+
+
+if __name__ == "__main__":
+    sample_payload = {
+        "proposal_date": "September 15, 2026",
+        "target_bank_name": "HDFC Bank Limited",
+        "target_bank_branch": "Medchal Branch",
+        "target_bank_address": "Medchal-Malkajgiri District, Telangana 501401.",
+        "bank_division": "Commercial SME Lending Desk (Priority Sector Lending Division)",
+        "requested_loan_amount_inr": 1000000.0,
+        "scheme_framework": "Priority Sector Lending Social Infrastructure & CGTMSE Credit Guarantee Framework",
+        "client_legal_name": "MANJULA EDUCATIONAL SOCIETY",
+        "operating_name": "Khushi Public School at Mahabubabad, Telangana",
+        "pan_number": "AABBM6884F",
+        "udyam_number": "UDYAM-TS-18-0040555",
+        "promoter_category": "woman entrepreneur belonging to the Scheduled Caste (SC) community",
+        "business_summary_text": "The school operates as a highly critical social infrastructure facility catering to primary educational needs up to the 8th standard (Upper Primary Stage, verified under continuous valid state regulatory board credentials). The setup has completed 1.2 years of continuous post-commencement operational history since launching its primary academic terms on 12/06/2025. To support a structural upsurge in new student enrollment cycles for upcoming terms, the society requires a specialized credit injection of Rs. 10,00,000/- (Rupees Ten Lakhs Only) slated for classroom expansion, tech links, and general infrastructure amplification.",
+        "dsa_name": "Vadlapati Vincent Paul",
+        "dsa_code": "9930570707",
+        "dsa_mobile": "+91 7995741844",
+        "dsa_email": "vincentvdp77@gmail.com",
+        "dsa_hub": "Medchal Cluster, Telangana (Ruloans HO Frame)",
+        "annual_rent_outlay_inr": 540000.0,
+        "annual_opex_outlay_inr": 900000.0,
+        "monthly_turnover_matrix": [
+            {"month": "September", "amount": 115500, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "October", "amount": 153500, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "November", "amount": 119000, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "December", "amount": 115000, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "January", "amount": 183000, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "February", "amount": 180000, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "March", "amount": 160000, "source": "Internal School Cash Flow Fee Register"},
+            {"month": "April", "amount": 282000, "source": "Peak Admission Term Renewal Flow Cycle"},
+            {"month": "May", "amount": 148200, "source": "Standard Term Collection Run"},
+            {"month": "June", "amount": 230000, "source": "Peak Admission Term Renewal Flow Cycle"},
+            {"month": "July", "amount": 149000, "source": "Mid-Term Fee Allocation Block"},
+            {"month": "August", "amount": 145500, "source": "Mid-Term Fee Allocation Block"}
+        ]
+    }
     generate_pdf_file(sample_payload)

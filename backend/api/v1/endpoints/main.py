@@ -35,3 +35,9 @@ def read_root():
         "engine": "JinOps High-Precision Credit Engine",
         "message": "Welcome to JinOps API Engine"
     }
+# Mount Documents Endpoint
+try:
+    from backend.api.v1.endpoints.documents import router as documents_router
+    app.include_router(documents_router, prefix="/api/v1/documents", tags=["Documents"])
+except Exception as e:
+    pass

@@ -175,3 +175,37 @@ if __name__ == "__main__":
     )
     
     print(json.dumps(response, indent=2))
+def run_underwriting_engine(parsed_data: dict) -> dict:
+    turnover = parsed_data.get("annual_turnover") or 0.0
+    gstin = parsed_data.get("gstin")
+    pan = parsed_data.get("pan")
+
+    # Core Financial Rules
+    monthly_income = turnover / 12.0 if turnover > 0 else 0.0
+    max_allowed_foir = 0.60  # 60% FOIR for Business Loans
+    
+    eligible_monthly_emi = monthly_income * max_allowed_foir
+    estimated_max_loan = eligible_monthly_emi * 48  # 4-year tenure multiplier
+
+    # Risk Scoring Logic
+    risk_score = 685  # Adjusted Default baseline
+    status = "APPROVED"
+
+    if not gstin or not pan:
+        risk_score -= 100
+        status = "MANUAL_REVIEW_REQUIRED"
+
+    if turnover < 1200000:  # Below 12 Lakhs annual
+        status = "REJECTED"
+        reason = "Annual turnover below threshold eligibility."
+    else:
+        reason = "Financial profile meets underwriting policy guidelines."
+
+    return {
+        "status": status,
+        "monthly_cashflow_est": round(monthly_income, 2),
+        "eligible_monthly_emi": round(eligible_monthly_emi, 2),
+        "max_loan_limit": round(estimated_max_loan, 2),
+        "risk_score": risk_score,
+        "remark": reason
+    }   
