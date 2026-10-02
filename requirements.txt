@@ -2,5 +2,6 @@ fastapi
 uvicorn
 pydantic
 reportlab
+pypdf
 python-multipart
 gunicorn
