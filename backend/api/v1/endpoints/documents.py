@@ -122,13 +122,34 @@ async def upload_msme_documents(
         raise HTTPException(status_code=500, detail=f"à°…à°ªà±â€Œà°²à±‹à°¡à± à°²à±‡à°¦à°¾ à°…à°‚à°¡à°°à±â€Œà°°à±ˆà°Ÿà°¿à°‚à°—à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿: {str(e)}")
 from fastapi.responses import Response
 
+# @router.post("/generate-cam-pdf-file")
+# async def generate_cam_pdf_file(payload: dict):
+#     if CAMPDFGeneratorService:
+#         pdf_bytes = CAMPDFGeneratorService.generate_cam_pdf(payload)
+#         return Response(
+#             content=pdf_bytes,
+#             media_type="application/pdf",
+#             headers={"Content-Disposition": "attachment; filename=JinOps_CAM_Report.pdf"}
+#         )
+#     return {"error": "PDF generator service unavailable"}
+
 @router.post("/generate-cam-pdf-file")
 async def generate_cam_pdf_file(payload: dict):
-    if CAMPDFGeneratorService:
-        pdf_bytes = CAMPDFGeneratorService.generate_cam_pdf(payload)
-        return Response(
-            content=pdf_bytes,
-            media_type="application/pdf",
-            headers={"Content-Disposition": "attachment; filename=JinOps_CAM_Report.pdf"}
-        )
-    return {"error": "PDF generator service unavailable"}
+    """
+    Generates CAM PDF dynamically based on the provided input payload data.
+    """
+    try:
+        if CAMPDFGeneratorService:
+            pdf_bytes = CAMPDFGeneratorService.generate_cam_pdf(payload)
+            return Response(
+                content=pdf_bytes,
+                media_type="application/pdf",
+                headers={"Content-Disposition": "attachment; filename=JinOps_CAM_Report.pdf"}
+            )
+        else:
+            raise HTTPException(
+                status_code=503, 
+                detail="PDF Generator Service is currently unavailable."
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"CAM generation error: {str(e)}")
