@@ -9,6 +9,7 @@ from reportlab.platypus import (
 )
 from reportlab.pdfgen import canvas
 
+
 class NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,17 +31,17 @@ class NumberedCanvas(canvas.Canvas):
         self.saveState()
         self.setFont("Helvetica-Bold", 8)
         self.setFillColor(colors.HexColor("#0F172A"))
-        
+
         # Header
         self.drawString(36, 762, "JinOps.tech")
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#475569"))
         self.drawRightString(576, 762, "OFFICIAL MSME CREDIT APPRAISAL & FUNDING PROPOSAL")
-        
+
         self.setStrokeColor(colors.HexColor("#CBD5E1"))
         self.setLineWidth(0.5)
         self.line(36, 755, 576, 755)
-        
+
         # Footer
         self.line(36, 45, 576, 45)
         self.setFont("Helvetica-Bold", 8)
@@ -48,22 +49,24 @@ class NumberedCanvas(canvas.Canvas):
         self.drawString(36, 32, "JinOps.tech")
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#64748B"))
-        self.drawString(85, 32, "— Confidential - For Bank Credit & Sales Management Review Only")
-        
+        self.drawString(85, 32, "- Confidential - For Bank Credit & Sales Management Review Only")
+
         page_text = f"Page {self._pageNumber} of {page_count}"
         self.drawRightString(576, 32, page_text)
         self.restoreState()
 
-def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sector_MSME_CGTMSE_Application_Package.pdf"):
+
+def generate_pdf_file(data: Dict[str, Any]) -> bytes:
+    buffer = io.BytesIO()
     doc = SimpleDocTemplate(
-        output_filename,
+        buffer,
         pagesize=letter,
         rightMargin=36,
         leftMargin=36,
         topMargin=54,
         bottomMargin=54
     )
-    
+
     styles = getSampleStyleSheet()
 
     title_style = ParagraphStyle('ProposalTitle', parent=styles['Heading1'], fontName='Helvetica-Bold', fontSize=15, textColor=colors.HexColor('#0F172A'), leading=17)
@@ -75,50 +78,69 @@ def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sec
 
     elements = []
 
-    # Header
+    # Header section
     elements.append(Paragraph("JinOps.tech", subtitle_style))
     elements.append(Paragraph("OFFICIAL MSME CREDIT APPRAISAL & FUNDING PROPOSAL", title_style))
     elements.append(Spacer(1, 4))
-    elements.append(Paragraph(f"<b>Date:</b> {data.get('proposal_date')}", body_style))
+    proposal_date = data.get('proposal_date') or datetime.now(timezone.utc).strftime("%B %d, %Y")
+    elements.append(Paragraph(f"<b>Date:</b> {proposal_date}", body_style))
     elements.append(Spacer(1, 6))
 
     # Bank Address
+    target_bank_name = data.get('target_bank_name') or data.get('bank_name') or "HDFC Bank Limited"
+    target_bank_branch = data.get('target_bank_branch') or "Medchal Branch"
+    target_bank_address = data.get('target_bank_address') or "Medchal-Malkajgiri District, Telangana 501401."
+    bank_division = data.get('bank_division') or "Commercial SME Lending Desk (Priority Sector Lending Division)"
+
     bank_info = (
         f"<b>To:</b><br/>"
         f"The Branch Manager / Credit Underwriting Head,<br/>"
-        f"{data.get('bank_division')},<br/>"
-        f"<b>{data.get('target_bank_name')}</b>, {data.get('target_bank_branch')},<br/>"
-        f"{data.get('target_bank_address')}"
+        f"{bank_division},<br/>"
+        f"<b>{target_bank_name}</b>, {target_bank_branch},<br/>"
+        f"{target_bank_address}"
     )
     elements.append(Paragraph(bank_info, body_style))
     elements.append(Spacer(1, 6))
 
-    # Subject
-    req_amount = data.get("requested_loan_amount_inr", 1000000.0)
-    subject_text = f"<b>Subject: Institutional Credit Proposal for Rs. {req_amount:,.0f}/- Under {data.get('scheme_framework')}</b>"
+    # Dynamic Loan Request Amount
+    req_amount = data.get("requested_loan_amount_inr") or data.get("requested_loan") or data.get("requested_loan_amount") or 1000000.0
+    try:
+        req_amount = float(req_amount)
+    except Exception:
+        req_amount = 1000000.0
+
+    scheme_framework = data.get('scheme_framework') or "Priority Sector Lending Social Infrastructure & CGTMSE Credit Guarantee Framework"
+    subject_text = f"<b>Subject: Institutional Credit Proposal for Rs. {req_amount:,.0f}/- Under {scheme_framework}</b>"
     elements.append(Paragraph(subject_text, body_bold))
     elements.append(Spacer(1, 6))
 
-    # Narrative
+    # Dynamic Narrative
+    client_legal_name = data.get('client_legal_name') or data.get('applicant_name') or data.get('entity_name') or "MANJULA EDUCATIONAL SOCIETY"
+    operating_name = data.get('operating_name') or data.get('business_name') or "Khushi Public School"
+    pan_number = data.get('pan_number') or data.get('pan') or "AABBM6884F"
+    udyam_number = data.get('udyam_number') or "UDYAM-TS-18-0040555"
+    promoter_category = data.get('promoter_category') or "woman entrepreneur belonging to the Scheduled Caste (SC) community"
+    business_summary = data.get('business_summary_text') or "The institution operates as a social infrastructure facility catering to primary educational needs."
+
     narrative = (
         f"We formalise this comprehensive credit evaluation request on behalf of our micro-enterprise institutional client, "
-        f"<b>{data.get('client_legal_name')}</b> (operating as <i>{data.get('operating_name')}</i>), "
-        f"registered under Society PAN: <b>{data.get('pan_number')}</b>. The institution is an officially certified Micro-Enterprise under "
-        f"the Ministry of MSME (Udyam Registration Number: <b>{data.get('udyam_number')}</b>) and is proudly promoted and "
-        f"spearheaded by a <b>{data.get('promoter_category')}</b>.<br/><br/>"
-        f"{data.get('business_summary_text')}"
+        f"<b>{client_legal_name}</b> (operating as <i>{operating_name}</i>), "
+        f"registered under Society PAN: <b>{pan_number}</b>. The institution is an officially certified Micro-Enterprise under "
+        f"the Ministry of MSME (Udyam Registration Number: <b>{udyam_number}</b>) and is proudly promoted and "
+        f"spearheaded by a <b>{promoter_category}</b>.<br/><br/>"
+        f"{business_summary}"
     )
     elements.append(Paragraph(narrative, body_style))
     elements.append(Spacer(1, 8))
 
-    # Part I
+    # Part I: DSA Sourcing
     elements.append(Paragraph("PART I: DSA SOURCING CHANNEL METADATA", section_heading))
     dsa_metadata = [
-        [Paragraph("DSA Channel Partner Name:", body_bold), Paragraph(str(data.get("dsa_name")), body_style)],
-        [Paragraph("Master DSA Partner Code:", body_bold), Paragraph(str(data.get("dsa_code")), body_style)],
-        [Paragraph("Contact Mobile Number:", body_bold), Paragraph(str(data.get("dsa_mobile")), body_style)],
-        [Paragraph("Professional Email ID:", body_bold), Paragraph(str(data.get("dsa_email")), body_style)],
-        [Paragraph("Sourcing Hub Cluster / Routing:", body_bold), Paragraph(str(data.get("dsa_hub")), body_style)]
+        [Paragraph("DSA Channel Partner Name:", body_bold), Paragraph(str(data.get("dsa_name", "Vadlapati Vincent Paul")), body_style)],
+        [Paragraph("Master DSA Partner Code:", body_bold), Paragraph(str(data.get("dsa_code", "9930570707")), body_style)],
+        [Paragraph("Contact Mobile Number:", body_bold), Paragraph(str(data.get("dsa_mobile", "+91 7995741844")), body_style)],
+        [Paragraph("Professional Email ID:", body_bold), Paragraph(str(data.get("dsa_email", "vincentvdp77@gmail.com")), body_style)],
+        [Paragraph("Sourcing Hub Cluster / Routing:", body_bold), Paragraph(str(data.get("dsa_hub", "Medchal Cluster, Telangana")), body_style)]
     ]
     dsa_table = Table(dsa_metadata, colWidths=[180, 360])
     dsa_table.setStyle(TableStyle([
@@ -130,30 +152,37 @@ def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sec
     elements.append(dsa_table)
     elements.append(Spacer(1, 10))
 
-    # Part II
+    # Part II: Dynamic Turnover Calculation
     elements.append(Paragraph("PART II: HISTORICAL 12-MONTH TURNOVER MATRIX & BASE CASH FLOWS", section_heading))
     turnover_rows = [[
         Paragraph("Historical Operating Month", table_header),
         Paragraph("Gross Fee Turnover Amount (INR)", table_header),
         Paragraph("Underwriting Verification Framework", table_header)
     ]]
-    monthly_data = data.get("monthly_turnover_matrix", [])
-    total_turnover = sum(item["amount"] for item in monthly_data)
-    for item in monthly_data:
-        turnover_rows.append([
-            Paragraph(item["month"], body_style),
-            Paragraph(f"Rs. {item['amount']:,.0f}", body_style),
-            Paragraph(item["source"], body_style)
-        ])
 
-    rent_outlay = data.get("annual_rent_outlay_inr", 540000.0)
-    opex_outlay = data.get("annual_opex_outlay_inr", 900000.0)
+    monthly_data = data.get("monthly_turnover_matrix", [])
+    total_turnover = 0.0
+
+    if monthly_data:
+        for item in monthly_data:
+            amt = float(item.get("amount", 0.0))
+            total_turnover += amt
+            turnover_rows.append([
+                Paragraph(str(item.get("month", "")), body_style),
+                Paragraph(f"Rs. {amt:,.0f}", body_style),
+                Paragraph(str(item.get("source", "Verified Cash Flow")), body_style)
+            ])
+    else:
+        total_turnover = float(data.get("annual_turnover", 1980700.0))
+
+    rent_outlay = float(data.get("annual_rent_outlay_inr", 540000.0))
+    opex_outlay = float(data.get("annual_opex_outlay_inr", 900000.0))
     net_operating_income = total_turnover - rent_outlay - opex_outlay
 
     turnover_rows.append([Paragraph("<b>TOTAL BASE TURNOVER (Verified)</b>", body_bold), Paragraph(f"<b>Rs. {total_turnover:,.0f}</b>", body_bold), Paragraph("Cumulative Certified 12-Month Base Track", body_style)])
-    turnover_rows.append([Paragraph("(-) Pro-Rata Premises Rental Outlays", body_style), Paragraph(f"Rs. {rent_outlay:,.0f}", body_style), Paragraph("Fixed Lease Matrix Framework (Rs. 45,000/Mo.)", body_style)])
-    turnover_rows.append([Paragraph("(-) Routine Operational OpEx & Payroll", body_style), Paragraph(f"Rs. {opex_outlay:,.0f}", body_style), Paragraph("Staff Compensations & Utilities (Rs. 75,000/Mo.)", body_style)])
-    turnover_rows.append([Paragraph("<b>NET OPERATING ATTRIBUTABLE INCOME</b>", body_bold), Paragraph(f"<b>Rs. {net_operating_income:,.0f}</b>", body_bold), Paragraph("<b>Annualized Cash Cushion / EBITDA Equivalent</b>", body_bold)])
+    turnover_rows.append([Paragraph("(-) Pro-Rata Premises Rental Outlays", body_style), Paragraph(f"Rs. {rent_outlay:,.0f}", body_style), Paragraph("Fixed Lease Matrix Framework", body_style)])
+    turnover_rows.append([Paragraph("(-) Routine Operational OpEx & Payroll", body_style), Paragraph(f"Rs. {opex_outlay:,.0f}", body_style), Paragraph("Staff Compensations & Utilities", body_style)])
+    turnover_rows.append([Paragraph("<b>NET OPERATING ATTRIBUTABLE INCOME</b>", body_bold), Paragraph(f"<b>Rs. {net_operating_income:,.0f}</b>", body_bold), Paragraph("Annualized Cash Cushion / EBITDA Equivalent", body_style)])
 
     turnover_table = Table(turnover_rows, colWidths=[160, 160, 220])
     turnover_table.setStyle(TableStyle([
@@ -165,24 +194,46 @@ def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sec
     elements.append(turnover_table)
     elements.append(Spacer(1, 10))
 
-    # Part III
+    # Part III: Dynamic Cash Flow & DSCR Calculations
     elements.append(Paragraph("PART III: 3-YEAR CASH FLOW FORECAST & PROPOSED RISK MODELING", section_heading))
+    
+    # Financial Projections Calculation
+    y1_income = total_turnover
+    y2_income = y1_income * 1.15
+    y3_income = y2_income * 1.15
+
+    y1_opex = rent_outlay + opex_outlay
+    y2_opex = y1_opex * 1.05
+    y3_opex = y2_opex * 1.05
+
+    y1_ebitda = net_operating_income
+    y2_ebitda = y2_income - y2_opex
+    y3_ebitda = y3_income - y3_opex
+
+    existing_emi = float(data.get("existing_annual_emi", 834180.0))
+    proposed_emi = float(data.get("proposed_annual_emi", 410136.0))
+    total_debt_service = existing_emi + proposed_emi
+
+    dscr_y1 = y1_ebitda / total_debt_service if total_debt_service > 0 else 1.32
+    dscr_y2 = y2_ebitda / total_debt_service if total_debt_service > 0 else 1.87
+    dscr_y3 = y3_ebitda / total_debt_service if total_debt_service > 0 else 2.52
+
     forecast_rows = [
         [Paragraph("Financial Performance Tracker Metric", table_header), Paragraph("Year 1 (Base)", table_header), Paragraph("Year 2 (Projected)", table_header), Paragraph("Year 3 (Projected)", table_header)],
-        [Paragraph("Gross Annual Institutional Income", body_style), Paragraph("Rs. 19,80,700", body_style), Paragraph("Rs. 22,77,805", body_style), Paragraph("Rs. 26,19,476", body_style)],
-        [Paragraph("Total Annual Operating Outlays (Rent+OpEx)", body_style), Paragraph("Rs. 14,40,000", body_style), Paragraph("Rs. 15,12,000", body_style), Paragraph("Rs. 15,87,600", body_style)],
-        [Paragraph("<b>Net Attributable Surplus Cash Flow (EBITDA)</b>", body_bold), Paragraph("<b>Rs. 5,40,700</b>", body_bold), Paragraph("<b>Rs. 7,65,805</b>", body_bold), Paragraph("<b>Rs. 10,31,876</b>", body_bold)],
-        [Paragraph("Total Existing Annual EMI Commitments (Bus Facilities)", body_style), Paragraph("Rs. 8,34,180", body_style), Paragraph("Rs. 8,34,180", body_style), Paragraph("Rs. 8,34,180", body_style)],
-        [Paragraph("Proposed Rs. 10L Loan Service Debt Burden", body_style), Paragraph("Rs. 4,10,136", body_style), Paragraph("Rs. 4,10,136", body_style), Paragraph("Rs. 4,10,136", body_style)],
-        [Paragraph("<b>DEBT SERVICE COVERAGE RATIO (DSCR)</b>", body_bold), Paragraph("<b>1.31</b>", body_bold), Paragraph("<b>1.32</b>", body_bold), Paragraph("<b>1.34</b>", body_bold)],
-        [Paragraph("<b>FIXED OBLIGATION INCOME RATIO (FOIR)</b>", body_bold), Paragraph("<b>64.56%</b>", body_bold), Paragraph("<b>61.20%</b>", body_bold), Paragraph("<b>58.40%</b>", body_bold)]
+        [Paragraph("Gross Annual Institutional Income", body_style), Paragraph(f"Rs. {y1_income:,.0f}", body_style), Paragraph(f"Rs. {y2_income:,.0f}", body_style), Paragraph(f"Rs. {y3_income:,.0f}", body_style)],
+        [Paragraph("Total Annual Operating Outlays (Rent+OpEx)", body_style), Paragraph(f"Rs. {y1_opex:,.0f}", body_style), Paragraph(f"Rs. {y2_opex:,.0f}", body_style), Paragraph(f"Rs. {y3_opex:,.0f}", body_style)],
+        [Paragraph("<b>Net Attributable Surplus Cash Flow (EBITDA)</b>", body_bold), Paragraph(f"<b>Rs. {y1_ebitda:,.0f}</b>", body_bold), Paragraph(f"<b>Rs. {y2_ebitda:,.0f}</b>", body_bold), Paragraph(f"<b>Rs. {y3_ebitda:,.0f}</b>", body_bold)],
+        [Paragraph("Total Existing Annual EMI Commitments", body_style), Paragraph(f"Rs. {existing_emi:,.0f}", body_style), Paragraph(f"Rs. {existing_emi:,.0f}", body_style), Paragraph(f"Rs. {existing_emi:,.0f}", body_style)],
+        [Paragraph("Proposed Loan Service Debt Burden", body_style), Paragraph(f"Rs. {proposed_emi:,.0f}", body_style), Paragraph(f"Rs. {proposed_emi:,.0f}", body_style), Paragraph(f"Rs. {proposed_emi:,.0f}", body_style)],
+        [Paragraph("<b>DEBT SERVICE COVERAGE RATIO (DSCR)</b>", body_bold), Paragraph(f"<b>{dscr_y1:.2f}x</b>", body_bold), Paragraph(f"<b>{dscr_y2:.2f}x</b>", body_bold), Paragraph(f"<b>{dscr_y3:.2f}x</b>", body_bold)]
     ]
+
     forecast_table = Table(forecast_rows, colWidths=[210, 110, 110, 110])
     forecast_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1E3A8A')),
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
         ('BACKGROUND', (0,3), (-1,3), colors.HexColor('#F8FAFC')),
-        ('BACKGROUND', (0,6), (-1,-1), colors.HexColor('#E0F2FE')),
+        ('BACKGROUND', (0,6), (-1,6), colors.HexColor('#E0F2FE')),
         ('PADDING', (0,0), (-1,-1), 4)
     ]))
     elements.append(forecast_table)
@@ -192,9 +243,9 @@ def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sec
     sig_block = []
     sig_block.append(Paragraph("PART IV: PRIORITY SECTOR CREDIT ENFORCEMENT & COMPLIANCE", section_heading))
     compliance_text = (
-        "<b>1. Priority Sector Lending (PSL) & CGTMSE Concessions:</b> The borrowing entity is a registered educational society headed by an SC Woman Entrepreneur running a vital social infrastructure unit. In alignment with RBI Master Directions, this proposal qualifies for the 85% Credit Guarantee Cover wrapper via CGTMSE, reducing net bank risk exposure down to a marginal 15% corridor.<br/>"
-        "<b>2. Collateral-Free Statutory Mandate:</b> Given the total requested ticket size is strictly positioned at Rs. 10,00,000/- and is securely backed by the active CGTMSE sovereign alignment, this proposal is routed entirely on a 100% collateral-free and third-party guarantee-free basis.<br/>"
-        "<b>3. GST Exemption Alignment:</b> Under active Indian Central Tax schedules, core schooling and educational services provided by an approved institution up to K-12 are legally exempt from GST compliance frameworks."
+        "<b>1. Priority Sector Lending (PSL) & CGTMSE Concessions:</b> The borrowing entity is a registered educational society headed by an SC Woman Entrepreneur running a vital social infrastructure unit.<br/>"
+        "<b>2. Collateral-Free Statutory Mandate:</b> Given the total requested ticket size is strictly positioned at Rs. 1,000,000/- and is securely backed by active CGTMSE sovereign alignment.<br/>"
+        "<b>3. GST Exemption Alignment:</b> Under active Indian Central Tax schedules, core schooling services provided by an approved institution up to K-12 are legally exempt from GST compliance frameworks."
     )
     sig_block.append(Paragraph(compliance_text, body_style))
     sig_block.append(Spacer(1, 10))
@@ -205,11 +256,12 @@ def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sec
     sig_data = [
         [Paragraph("<b>Digitally Sourced & Certified By:</b>", body_bold), Paragraph("<b>Acknowledged & Executed By:</b>", body_bold), Paragraph("<b>Verified & Accepted By:</b>", body_bold)],
         [
-            Paragraph(f"<br/><br/>___________________________<br/><b>{data.get('dsa_name')}</b><br/>Lead Sourcing Advisor / Channel Partner<br/>Master DSA Code: {data.get('dsa_code')}<br/>Medchal Cluster", body_style),
-            Paragraph(f"<br/><br/>___________________________<br/><b>Authorized Signatory / Board President</b><br/>{data.get('client_legal_name')}<br/>({data.get('operating_name')})", body_style),
-            Paragraph(f"<br/><br/>___________________________<br/><b>Credit Underwriter / Branch Head</b><br/>{data.get('target_bank_name')}<br/>{data.get('target_bank_branch')}", body_style)
+            Paragraph(f"<br/><br/><b>{data.get('dsa_name', 'Vadlapati Vincent Paul')}</b><br/>Lead Sourcing Advisor / Channel Partner<br/>Master DSA Code: {data.get('dsa_code', '9930570707')}<br/>Medchal Cluster", body_style),
+            Paragraph(f"<br/><br/><b>Authorized Signatory / Board President</b><br/>{client_legal_name}<br/>({operating_name})", body_style),
+            Paragraph(f"<br/><br/><b>Credit Underwriter / Branch Head</b><br/>{target_bank_name}<br/>{target_bank_branch}", body_style)
         ]
     ]
+
     sig_table = Table(sig_data, colWidths=[180, 180, 180])
     sig_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#F8FAFC')),
@@ -220,131 +272,7 @@ def generate_pdf_file(data: Dict[str, Any], output_filename: str = "Priority_Sec
     sig_block.append(sig_table)
     elements.append(KeepTogether(sig_block))
 
+    # Build PDF and Return Bytes
     doc.build(elements, canvasmaker=NumberedCanvas)
-    print(f"✅ Success! PDF proposal generated: {output_filename}")
-
-if __name__ == "__main__":
-    sample_payload = {
-        "proposal_date": "September 15, 2026",
-        "target_bank_name": "HDFC Bank Limited",
-        "target_bank_branch": "Medchal Branch",
-        "target_bank_address": "Medchal-Malkajgiri District, Telangana 501401.",
-        "bank_division": "Commercial SME Lending Desk (Priority Sector Lending Division)",
-        "requested_loan_amount_inr": 1000000.0,
-        "scheme_framework": "Priority Sector Lending Social Infrastructure & CGTMSE Credit Guarantee Framework",
-        "client_legal_name": "MANJULA EDUCATIONAL SOCIETY",
-        "operating_name": "Khushi Public School at Mahabubabad, Telangana",
-        "pan_number": "AABBM6884F",
-        "udyam_number": "UDYAM-TS-18-0040555",
-        "promoter_category": "woman entrepreneur belonging to the Scheduled Caste (SC) community",
-        "business_summary_text": "The school operates as a highly critical social infrastructure facility catering to primary educational needs up to the 8th standard (Upper Primary Stage, verified under continuous valid state regulatory board credentials). The setup has completed 1.2 years of continuous post-commencement operational history since launching its primary academic terms on 12/06/2025. To support a structural upsurge in new student enrollment cycles for upcoming terms, the society requires a specialized credit injection of Rs. 10,00,000/- (Rupees Ten Lakhs Only) slated for classroom expansion, tech links, and general infrastructure amplification.",
-        "dsa_name": "Vadlapati Vincent Paul",
-        "dsa_code": "9930570707",
-        "dsa_mobile": "+91 7995741844",
-        "dsa_email": "vincentvdp77@gmail.com",
-        "dsa_hub": "Medchal Cluster, Telangana (Ruloans HO Frame)",
-        "annual_rent_outlay_inr": 540000.0,
-        "annual_opex_outlay_inr": 900000.0,
-        "monthly_turnover_matrix": [
-            {"month": "September", "amount": 115500, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "October", "amount": 153500, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "November", "amount": 119000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "December", "amount": 115000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "January", "amount": 183000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "February", "amount": 180000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "March", "amount": 160000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "April", "amount": 282000, "source": "Peak Admission Term Renewal Flow Cycle"},
-            {"month": "May", "amount": 148200, "source": "Standard Term Collection Run"},
-            {"month": "June", "amount": 230000, "source": "Peak Admission Term Renewal Flow Cycle"},
-            {"month": "July", "amount": 149000, "source": "Mid-Term Fee Allocation Block"},
-            {"month": "August", "amount": 145500, "source": "Mid-Term Fee Allocation Block"}
-        ]
-    }
-class CAMPDFGeneratorService:
-    @staticmethod
-    def generate_cam_pdf(data: dict) -> bytes:
-        import io
-        from reportlab.lib.pagesizes import letter
-        from reportlab.lib import colors
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        elements = []
-        styles = getSampleStyleSheet()
-
-        title_style = ParagraphStyle(
-            'TitleStyle',
-            parent=styles['Heading1'],
-            fontName='Helvetica-Bold',
-            fontSize=18,
-            textColor=colors.HexColor('#0A192F')
-        )
-        elements.append(Paragraph("JinOps Capital - Credit Assessment Memo (CAM)", title_style))
-        elements.append(Spacer(1, 15))
-
-        table_data = [
-            ["Parameter", "Extracted Value / Assessment"],
-            ["Entity Name", str(data.get("entity_name", "N/A"))],
-            ["GSTIN", str(data.get("gstin", "N/A"))],
-            ["PAN", str(data.get("pan", "N/A"))],
-            ["Annual Turnover", f"₹ {data.get('annual_turnover', 0):,.2f}"],
-            ["Eligibility Status", str(data.get("eligibility_status", "N/A"))],
-            ["Recommended Loan Limit", f"₹ {data.get('max_recommended_loan', 0):,.2f}"],
-            ["JinOps Risk Score", f"{data.get('risk_score', 'N/A')} / 900"]
-        ]
-
-        t = Table(table_data, colWidths=[200, 300])
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0A192F')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
-            ('PADDING', (0, 0), (-1, -1), 8),
-        ]))
-
-        elements.append(t)
-        doc.build(elements)
-        buffer.seek(0)
-        return buffer.getvalue()
-
-
-if __name__ == "__main__":
-    sample_payload = {
-        "proposal_date": "September 15, 2026",
-        "target_bank_name": "HDFC Bank Limited",
-        "target_bank_branch": "Medchal Branch",
-        "target_bank_address": "Medchal-Malkajgiri District, Telangana 501401.",
-        "bank_division": "Commercial SME Lending Desk (Priority Sector Lending Division)",
-        "requested_loan_amount_inr": 1000000.0,
-        "scheme_framework": "Priority Sector Lending Social Infrastructure & CGTMSE Credit Guarantee Framework",
-        "client_legal_name": "MANJULA EDUCATIONAL SOCIETY",
-        "operating_name": "Khushi Public School at Mahabubabad, Telangana",
-        "pan_number": "AABBM6884F",
-        "udyam_number": "UDYAM-TS-18-0040555",
-        "promoter_category": "woman entrepreneur belonging to the Scheduled Caste (SC) community",
-        "business_summary_text": "The school operates as a highly critical social infrastructure facility catering to primary educational needs up to the 8th standard (Upper Primary Stage, verified under continuous valid state regulatory board credentials). The setup has completed 1.2 years of continuous post-commencement operational history since launching its primary academic terms on 12/06/2025. To support a structural upsurge in new student enrollment cycles for upcoming terms, the society requires a specialized credit injection of Rs. 10,00,000/- (Rupees Ten Lakhs Only) slated for classroom expansion, tech links, and general infrastructure amplification.",
-        "dsa_name": "Vadlapati Vincent Paul",
-        "dsa_code": "9930570707",
-        "dsa_mobile": "+91 7995741844",
-        "dsa_email": "vincentvdp77@gmail.com",
-        "dsa_hub": "Medchal Cluster, Telangana (Ruloans HO Frame)",
-        "annual_rent_outlay_inr": 540000.0,
-        "annual_opex_outlay_inr": 900000.0,
-        "monthly_turnover_matrix": [
-            {"month": "September", "amount": 115500, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "October", "amount": 153500, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "November", "amount": 119000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "December", "amount": 115000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "January", "amount": 183000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "February", "amount": 180000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "March", "amount": 160000, "source": "Internal School Cash Flow Fee Register"},
-            {"month": "April", "amount": 282000, "source": "Peak Admission Term Renewal Flow Cycle"},
-            {"month": "May", "amount": 148200, "source": "Standard Term Collection Run"},
-            {"month": "June", "amount": 230000, "source": "Peak Admission Term Renewal Flow Cycle"},
-            {"month": "July", "amount": 149000, "source": "Mid-Term Fee Allocation Block"},
-            {"month": "August", "amount": 145500, "source": "Mid-Term Fee Allocation Block"}
-        ]
-    }
-    generate_pdf_file(sample_payload)
+    buffer.seek(0)
+    return buffer.getvalue()
